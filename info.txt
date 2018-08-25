@@ -1,0 +1,71 @@
+// func myfunc(a,b int, operation func (int,int)int){
+// result:=operation(a,b)
+// fmt.Println(result)
+// }
+// func add(x,y int) int{return x+y}
+// func sub(x,y int) int{return x-y}
+// func mul(x,y int) int{return x*y}
+// func degr(x,y int) int{return x%y}
+
+
+
+
+
+
+
+
+// second.Add()func main (){
+p1:=change(258)
+fmt.Print("Number is: " ,*p1)
+}
+
+func change(x int) *int {
+	p:=new(int)
+	*p=x
+	return p
+
+
+
+func main (){
+	for i:=1;i<7;i++{
+		go factorial(i)
+	}
+	fmt.Scanln()
+	fmt.Println("end")
+}
+func factorial(n int){
+	if n<1{
+fmt.Print(kek.Nigga())
+return
+	}
+	result:=1
+	for i:=1;i<n;i++{
+result*=i
+	}
+	fmt.Println(n,"-",result)
+}
+
+
+func main() {
+fmt.Print("For example: ")
+fmt.Println(degr(18,1))
+fmt.Println(degr(15,0))
+}
+func degr(x,y float64) float64{
+	if y==0{
+		panic(kek.Nigga())
+	}
+	return x/y
+}
+
+
+
+
+ 
+func main() {
+users:=[]string{"Alice","Kate","Alex","James"}
+users=append(users,"add name is Bob")
+var n=1
+user:=append(users[:n],users[n+1:] ...)
+fmt.Println(user)
+}
