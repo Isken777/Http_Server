@@ -21,7 +21,7 @@ type postArray struct {
 	Items map[string]post
 	sync.RWMutex
 }
-
+// newPostArray does things
 func newPostArray() *postArray {
 	p := postArray{}
 	p.Items = make(map[string]post)

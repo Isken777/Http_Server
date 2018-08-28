@@ -1,12 +1,18 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"path"
 	"strings"
+	"io/ioutil"
+	"os"
+	"sync"
 
+	"github.com/russross/blackfriday"
+	"gopkg.in/yaml.v2"
 	"github.com/bmizerany/pat"
 )
 
@@ -21,8 +27,75 @@ var (
 	posts         = newPostArray()
 )
 
+// Config - структура для считывания конфигурационного файла
+type Config struct {
+	Listen string `yaml:"listen"`
+}
+
+// ReadConfig does things
+func ReadConfig(ConfigName string) (x *Config, err error) {
+	var file []byte
+	if file, err = ioutil.ReadFile(ConfigName); err != nil {
+		return nil, err
+	}
+	x = new(Config)
+	if err = yaml.Unmarshal(file, x); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+
+type post struct {
+	Title   string
+	Body    template.HTML
+	ModTime int64
+}
+
+type postArray struct {
+	Items map[string]post
+	sync.RWMutex
+}
+// newPostArray does things
+func newPostArray() *postArray {
+	p := postArray{}
+	p.Items = make(map[string]post)
+	return &p
+}
+
+// Get Загружает markdown-файл и конвертирует его в HTML
+// Возвращает объект типа Post
+// Если путь не существует или является каталогом, то возвращаем ошибку
+func (p *postArray) Get(md string) (post, int, error) {
+	info, err := os.Stat(md)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// файл не существует
+			return post{}, 404, err
+		}
+		return post{}, 500, err
+	}
+	if info.IsDir() {
+		// не файл, а папка
+		return post{}, 404, fmt.Errorf("dir")
+	}
+	val, ok := p.Items[md]
+	if !ok || (ok && val.ModTime != info.ModTime().UnixNano()) {
+		p.RLock()
+		defer p.RUnlock()
+		fileread, _ := ioutil.ReadFile(md)
+		lines := strings.Split(string(fileread), "\n")
+		title := string(lines[0])
+		body := strings.Join(lines[1:len(lines)], "\n")
+		body = string(blackfriday.MarkdownCommon([]byte(body)))
+		p.Items[md] = post{title, template.HTML(body), info.ModTime().UnixNano()}
+	}
+	post := p.Items[md]
+	return post, 200, nil
+}
+
 func main() {
-	cfg, err := readConfig(configFileName)
+	cfg, err :=ReadConfig(configFileName) 
 	if err != nil {
 		log.Fatalln(err)
 	}
